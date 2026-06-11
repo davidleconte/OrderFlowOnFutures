@@ -5,17 +5,19 @@ channels:
 dependencies:
   - python=3.11
   - pip
-  - numpy
-  - pandas
-  - pyarrow
-  - scikit-learn
-  - lightgbm
   - pip:
+    - numpy
+    - pandas
+    - pyarrow
     - yfinance
+    - scikit-learn
+    - lightgbm
     - mlforecast
     - statsforecast
-    - "u8darts[torch]>=0.30"
+    - "u8darts[torch]"
     - joblib
     - torch
     - optuna
     - uv
+    - ruff
+    - pyright

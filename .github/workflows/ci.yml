@@ -32,16 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Install public requirements (skip vectorbtpro - private repo)
-          pip install $(grep -v "vectorbtpro" requirements.txt | grep -v "^#" | grep -v "^$") || true
-          
-          # Install vectorbtpro if GH_TOKEN is available
-          if [ -n "${{ secrets.GH_TOKEN }}" ]; then
-            echo "Installing vectorbtpro with GH_TOKEN..."
-            pip install "vectorbtpro @ git+https://${{ secrets.GH_TOKEN }}@github.com/polakowo/vectorbt.pro.git"
-          else
-            echo "GH_TOKEN not available - skipping vectorbtpro (private repo)"
-          fi
+          pip install numpy pandas pyarrow yfinance scikit-learn lightgbm mlforecast statsforecast "u8darts[torch]" joblib torch optuna
 
       - name: Lint (ruff)
         run: |
