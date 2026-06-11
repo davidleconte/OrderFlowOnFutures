@@ -17,6 +17,5 @@ dependencies:
     - "u8darts[torch]>=0.30"
     - joblib
     - torch
-    - vectorbtpro
     - optuna
     - uv
