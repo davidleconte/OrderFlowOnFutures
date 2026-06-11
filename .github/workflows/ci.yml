@@ -88,3 +88,7 @@ jobs:
       - name: Validate environment.yml (if exists)
         run: |
           test -f environment.yml && echo "environment.yml present" || echo "No environment.yml (using conda export)"
+
+      - name: Validate direnv setup
+        run: |
+          test -f .envrc && echo "direnv .envrc present" || echo "No .envrc found"
