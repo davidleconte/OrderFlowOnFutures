@@ -27,40 +27,34 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
       - name: Install libomp (macOS requirement for lightgbm)
         run: |
           brew install libomp || true
 
       - name: Install core dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install numpy pandas scikit-learn pyarrow
-          # Install lightgbm with proper libomp linkage
-          pip install lightgbm --no-cache-dir || pip install lightgbm
-
-      - name: Install dependencies
-        run: |
-          # Install key packages via pip (they should use pre-built wheels)
-          pip install yfinance mlforecast statsforecast optuna
-          
-          # Skip u8darts[torch] in CI - too heavy, requires scipy compilation
-          # Instead test the lighter imports
-          echo "Installed core packages successfully"
+          uv venv
+          uv pip install numpy pandas scikit-learn pyarrow lightgbm yfinance mlforecast statsforecast optuna
 
       - name: Lint (ruff)
         run: |
-          pip install ruff
-          ruff check src/ || true  # Skip if no src/ yet
-          ruff format --check src/ || true
+          uv pip install ruff
+          uv run ruff check src/ || true  # Skip if no src/ yet
+          uv run ruff format --check src/ || true
 
       - name: Type check (pyright)
         run: |
-          pip install pyright
-          pyright src/ || true  # Skip if no src/ yet
+          uv pip install pyright
+          uv run pyright src/ || true  # Skip if no src/ yet
 
       - name: Run smoke tests
         run: |
-          python -c "
+          uv run python -c "
           import numpy
           import pandas
           import sklearn
