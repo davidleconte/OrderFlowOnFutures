@@ -1,0 +1,22 @@
+name: orderflowonfutures
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - pyarrow
+  - scikit-learn
+  - lightgbm
+  - pip:
+    - yfinance
+    - mlforecast
+    - statsforecast
+    - "u8darts[torch]>=0.30"
+    - joblib
+    - torch
+    - vectorbtpro
+    - optuna
+    - uv

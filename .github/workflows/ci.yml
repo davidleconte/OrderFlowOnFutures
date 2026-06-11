@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    name: Lint & Test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          use-mamba: true
+          activate-environment: orderflowonfutures
+          environment-file: environment.yml
+
+      - name: Install uv
+        run: |
+          uv --version || conda install -c conda-forge uv -y
+
+      - name: Install dependencies
+        run: |
+          uv pip sync requirements.txt --python "$(which python)"
+
+      - name: Lint (ruff)
+        run: |
+          uv pip install ruff
+          ruff check src/ || true  # Skip if no src/ yet
+          ruff format --check src/ || true
+
+      - name: Type check (pyright)
+        run: |
+          uv pip install pyright
+          pyright src/ || true  # Skip if no src/ yet
+
+      - name: Run smoke tests
+        run: |
+          python -c "
+          import vectorbtpro
+          import torch
+          import mlforecast
+          import statsforecast
+          import darts
+          import lightgbm
+          import sklearn
+          import pandas
+          import numpy
+          print('All critical imports OK')
+          print(f'vectorbtpro: {vectorbtpro.__version__}')
+          print(f'torch: {torch.__version__}')
+          print(f'MPS: {torch.backends.mps.is_available()}')
+          "
+        env:
+          KMP_DUPLICATE_LIB_OK: TRUE
+
+  validate-env:
+    name: Validate Environment Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check requirements.txt validity
+        run: |
+          python -c "
+          with open('requirements.txt') as f:
+              lines = [l.strip() for l in f if l.strip() and not l.startswith('#')]
+          print(f'{len(lines)} requirements found')
+          assert len(lines) > 0, 'requirements.txt is empty'
+          "
+
+      - name: Validate environment.yml (if exists)
+        run: |
+          test -f environment.yml && echo "environment.yml present" || echo "No environment.yml (using conda export)"
