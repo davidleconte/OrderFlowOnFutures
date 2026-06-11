@@ -30,14 +30,10 @@ jobs:
           activate-environment: orderflowonfutures
           environment-file: environment.yml
 
-      - name: Install uv
-        run: |
-          uv --version || conda install -c conda-forge uv -y
-
       - name: Install dependencies
         run: |
-          # Install public requirements first
-          uv pip install -r requirements.txt --python "$(which python)" --no-deps
+          # Install public requirements (skip vectorbtpro - private repo)
+          pip install $(grep -v "vectorbtpro" requirements.txt | grep -v "^#" | grep -v "^$") || true
           
           # Install vectorbtpro if GH_TOKEN is available
           if [ -n "${{ secrets.GH_TOKEN }}" ]; then
@@ -49,13 +45,13 @@ jobs:
 
       - name: Lint (ruff)
         run: |
-          uv pip install ruff
+          pip install ruff
           ruff check src/ || true  # Skip if no src/ yet
           ruff format --check src/ || true
 
       - name: Type check (pyright)
         run: |
-          uv pip install pyright
+          pip install pyright
           pyright src/ || true  # Skip if no src/ yet
 
       - name: Run smoke tests
