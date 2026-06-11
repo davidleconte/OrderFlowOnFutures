@@ -1,0 +1,5 @@
+# Conda environment (reproducible via environment.yml)
+.conda/
+
+# macOS
+.DS_Store
